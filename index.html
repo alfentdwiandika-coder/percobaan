@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valentine Letter — Click Trigger Fixed</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: #0f0a19;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+      overflow-x: hidden;
+    }
+
+    /* CONTAINER UTAMA */
+    .app-card {
+      width: 100%;
+      max-width: 380px;
+      background: linear-gradient(180deg, #ffeef2 0%, #fff0f5 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
+      border: 3px solid #ffa3c4;
+      position: relative;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .app-header {
+      background-color: #ffd0e0;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid #f8b4cb;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red { background-color: #ff5f56; }
+    .dot-yellow { background-color: #ffbd2e; }
+    .dot-green { background-color: #27c93f; }
+
+    .url-bar {
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 12px;
+      color: #885066;
+      font-weight: 600;
+    }
+
+    .app-body {
+      padding: 25px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-height: 530px;
+    }
+
+    /* TARGET AMPLOP & HATI */
+    .envelope-box {
+      width: 150px;
+      height: 95px;
+      background-color: #ffffff;
+      border: 3px solid #ff7597;
+      border-radius: 8px;
+      position: relative;
+      margin-top: 10px;
+      box-shadow: 0 5px 15px rgba(255, 117, 151, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s;
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 72px solid transparent;
+      border-right: 72px solid transparent;
+      border-top: 48px solid #ffb3c6;
+      transition: transform 0.4s ease;
+      transform-origin: top;
+      z-index: 3;
+    }
+
+    .envelope-box.open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    .heart-icon {
+      color: #ff2a6d;
+      font-size: 28px;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.2s;
+    }
+
+    .title-text {
+      font-size: 18px;
+      color: #d6336c;
+      font-weight: 800;
+      margin: 15px 0 10px;
+    }
+
+    /* BUSUR, TALI, DAN ANAK PANAH */
+    .bow-container {
+      position: relative;
+      width: 220px;
+      height: 180px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bow-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .arrow-wrapper {
+      position: absolute;
+      top: 35px;
+      left: calc(50% - 15px);
+      width: 30px;
+      height: 70px;
+      cursor: grab;
+      touch-action: none;
+      z-index: 5;
+      transform-origin: center 10px;
+    }
+
+    .arrow-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .arrow-line {
+      width: 4px;
+      height: 55px;
+      background-color: #d6336c;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .arrow-line::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -5px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 12px solid #d6336c;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: #d6336c;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    /* TOMBOL YES & NO */
+    .love-question-box {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .love-question-box.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .question-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #d6336c;
+      margin-bottom: 15px;
+    }
+
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      width: 100%;
+      min-height: 100px;
+      position: relative;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, left 0.2s ease, top 0.2s ease;
+    }
+
+    .btn-yes {
+      background-color: #ff4d6d;
+      color: white;
+      z-index: 2;
+    }
+
+    .btn-no {
+      background-color: #a8a8a8;
+      color: white;
+      z-index: 1;
+    }
+
+    .heart-particle {
+      position: absolute;
+      color: #ff4d6d;
+      font-size: 18px;
+      pointer-events: none;
+      animation: floatUp 2.5s linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+    }
+
+    /* SECTION DISPLAY CODE */
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .code-card {
+      background-color: #161124;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #2a223d;
+    }
+
+    .code-card h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #ff7597;
+    }
+
+    .code-card pre {
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      color: #cfc2e9;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .keyword { color: #ff5370; }
+    .property { color: #80cbc4; }
+    .string-literal { color: #ecc48d; }
+    .comment { color: #676e95; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <!-- UTAMA -->
+  <div class="app-card" id="appCard">
+    <div class="app-header">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="url-bar">localhost / love</span>
+    </div>
+
+    <div class="app-body">
+      <!-- Target Amplop & Hati -->
+      <div class="envelope-box" id="envelope">
+        <div class="envelope-flap"></div>
+        <div class="heart-icon" id="targetHeart">♥</div>
+      </div>
+
+      <div class="title-text" id="mainTitle">♥ Do you love me? ♥</div>
+
+      <!-- Busur, Tali & Panah -->
+      <div class="bow-container" id="bowArea">
+        <svg class="bow-svg">
+          <path d="M 45 45 Q 110 95 175 45" fill="none" stroke="#b07d4f" stroke-width="6" stroke-linecap="round"/>
+          <path id="bowString" d="M 45 45 L 110 45 L 175 45" fill="none" stroke="#d1d1d1" stroke-width="2"/>
+        </svg>
+
+        <div class="arrow-wrapper" id="arrow">
+          <div class="arrow-line"></div>
+        </div>
+      </div>
+
+      <p class="hint-text" id="hintText">Aim & release to shoot Cupid's arrow ♥</p>
+
+      <!-- Pilihan Jawaban -->
+      <div class="love-question-box" id="questionBox">
+        <div class="question-title" id="questionTitle">Do you love me?</div>
+        <div class="buttons-container" id="btnContainer">
+          <button class="btn btn-yes" id="yesBtn">YES!</button>
+          <button class="btn btn-no" id="noBtn">NO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISPLAY CODE -->
+  <div class="code-grid">
+    <div class="code-card">
+      <h3>Html</h3>
+      <pre>
+<span class="comment"><!-- The LOVE window --></span>
+&lt;<span class="keyword">section</span> <span class="property">class</span>=<span class="string-literal">"window"</span>&gt;
+  &lt;<span class="keyword">h1</span>&gt;Do you love me?&lt;/<span class="keyword">h1</span>&gt;
+  &lt;<span class="keyword">button</span> <span class="property">id</span>=<span class="string-literal">"yesBtn"</span>&gt;YES!&lt;/<span class="keyword">button</span>&gt;
+  &lt;<span class="keyword">button</span> <span class="property">id</span>=<span class="string-literal">"noBtn"</span>&gt;NO&lt;/<span class="keyword">button</span>&gt;
+&lt;/<span class="keyword">section</span>&gt;</pre>
+    </div>
+
+    <div class="code-card">
+      <h3>CSS</h3>
+      <pre>
+<span class="selector">:root</span> {
+  <span class="property">--coral</span>: <span class="string-literal">#ff97b7</span>;
+}
+
+<span class="selector">.btn-no</span> {
+  <span class="property">position</span>: <span class="string-literal">relative</span>;
+  <span class="property">transition</span>: <span class="string-literal">all .18s ease</span>;
+}</pre>
+    </div>
+
+    <div class="code-card">
+      <h3>JS</h3>
+      <pre>
+<span class="keyword">function</span> dodge() {
+  noBtn.style.left = rand() + <span class="string-literal">'px'</span>;
+  yesScale += <span class="string-literal">0.07</span>;
+}
+
+noBtn.on(<span class="string-literal">'click'</span>, dodge);</pre>
+    </div>
+  </div>
+
+  <script>
+    const arrow = document.getElementById('arrow');
+    const envelope = document.getElementById('envelope');
+    const targetHeart = document.getElementById('targetHeart');
+    const bowString = document.getElementById('bowString');
+    const bowArea = document.getElementById('bowArea');
+    const hintText = document.getElementById('hintText');
+    const questionBox = document.getElementById('questionBox');
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const questionTitle = document.getElementById('questionTitle');
+    const btnContainer = document.getElementById('btnContainer');
+    const appCard = document.getElementById('appCard');
+
+    let startX = 0, startY = 0;
+    let deltaX = 0, deltaY = 0;
+    let isDragging = false;
+    let isShot = false;
+    let yesScale = 1;
+
+    // EVENT AIM & DRAG BEBAS
+    arrow.addEventListener('mousedown', startDrag);
+    arrow.addEventListener('touchstart', startDrag);
+
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('touchmove', drag);
+
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+      if (isShot) return;
+      isDragging = true;
+      const point = e.touches ? e.touches[0] : e;
+      startX = point.clientX;
+      startY = point.clientY;
+      arrow.style.transition = 'none';
+    }
+
+    function drag(e) {
+      if (!isDragging || isShot) return;
+      const point = e.touches ? e.touches[0] : e;
+      deltaX = point.clientX - startX;
+      deltaY = point.clientY - startY;
+
+      const distance = Math.min(Math.hypot(deltaX, deltaY), 65);
+      const angle = Math.atan2(deltaY, deltaX);
+
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance;
+
+      const rotationDegree = (angle * 180 / Math.PI) - 90;
+      arrow.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${rotationDegree}deg)`;
+
+      const stringX = 110 + moveX;
+      const stringY = 45 + moveY;
+      bowString.setAttribute('d', `M 45 45 L ${stringX} ${stringY} L 175 45`);
+    }
+
+    function endDrag() {
+      if (!isDragging || isShot) return;
+      isDragging = false;
+
+      const totalPull = Math.hypot(deltaX, deltaY);
+
+      if (totalPull > 20) {
+        shootAutoAim();
+      } else {
+        resetArrow();
+      }
+    }
+
+    function resetArrow() {
+      arrow.style.transition = 'transform 0.3s ease';
+      arrow.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      bowString.style.transition = 'd 0.3s ease';
+      bowString.setAttribute('d', 'M 45 45 L 110 45 L 175 45');
+      
+      setTimeout(() => {
+        bowString.style.transition = 'none';
+      }, 300);
+
+      deltaX = 0;
+      deltaY = 0;
+    }
+
+    function shootAutoAim() {
+      isShot = true;
+
+      bowString.setAttribute('d', 'M 45 45 L 110 45 L 175 45');
+
+      const arrowRect = arrow.getBoundingClientRect();
+      const heartRect = targetHeart.getBoundingClientRect();
+
+      const targetX = (heartRect.left + heartRect.width / 2) - (arrowRect.left + arrowRect.width / 2);
+      const targetY = (heartRect.top + heartRect.height / 2) - (arrowRect.top + arrowRect.height / 2);
+
+      const autoAngle = Math.atan2(targetY, targetX);
+      const autoRotation = (autoAngle * 180 / Math.PI) + 90;
+
+      arrow.style.transition = 'transform 0.4s cubic-bezier(0.1, 0.8, 0.3, 1)';
+      arrow.style.transform = `translate(${targetX}px, ${targetY}px) rotate(${autoRotation}deg)`;
+
+      setTimeout(() => {
+        targetHeart.style.transform = 'scale(1.5)';
+        envelope.classList.add('open');
+        envelope.style.transform = 'scale(1.1)';
+        
+        arrow.style.opacity = '0';
+        bowArea.style.display = 'none';
+        hintText.style.display = 'none';
+
+        questionBox.classList.add('show');
+      }, 400);
+    }
+
+    // LOGIKA PENCET TOMBOL NO (KABUR + MEMBESARKAN YES)
+    function handleNoClick(e) {
+      e.preventDefault();
+
+      const containerRect = btnContainer.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      noBtn.style.position = 'absolute';
+
+      const maxX = containerRect.width - btnRect.width;
+      const maxY = containerRect.height - btnRect.height;
+
+      const randomX = Math.floor(Math.random() * maxX);
+      const randomY = Math.floor(Math.random() * maxY);
+
+      noBtn.style.left = randomX + 'px';
+      noBtn.style.top = randomY + 'px';
+
+      // YES bertambah besar setiap NO dipencet
+      yesScale += 0.15;
+      yesBtn.style.transform = `scale(${yesScale})`;
+    }
+
+    noBtn.addEventListener('click', handleNoClick);
+    noBtn.addEventListener('touchstart', handleNoClick);
+
+    // LOGIKA PENCET TOMBOL YES
+    yesBtn.addEventListener('click', () => {
+      questionTitle.textContent = 'Yippeeee! I Love You Too! ♥';
+      btnContainer.style.display = 'none';
+      rainHearts();
+    });
+
+    function rainHearts() {
+      for (let i = 0; i < 25; i++) {
+        setTimeout(() => {
+          const heart = document.createElement('div');
+          heart.classList.add('heart-particle');
+          heart.innerHTML = '♥';
+          heart.style.left = Math.random() * 80 + 10 + '%';
+          heart.style.top = '60%';
+          appCard.appendChild(heart);
+
+          setTimeout(() => heart.remove(), 2500);
+        }, i * 100);
+      }
+    }
+  </script>
+</body>
+</html>
